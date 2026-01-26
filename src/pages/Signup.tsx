@@ -105,13 +105,7 @@ const Signup = () => {
       {/* Right side - Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 text-xl font-bold mb-8">
-            <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/30">
-              <Zap className="h-5 w-5 text-primary" />
-            </div>
-            <span className="text-gradient">X-Ops</span>
-          </Link>
+
 
           <h1 className="text-3xl font-bold mb-2">Create an account</h1>
           <p className="text-muted-foreground mb-8">
