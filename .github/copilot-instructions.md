@@ -47,15 +47,26 @@ npm run test:watch   # Watch mode for tests
 npm run preview      # Preview production build locally
 ```
 
+### Package Manager
+- Uses **Bun** (see `bun.lockb` in repo root) - faster, all-in-one JavaScript runtime
+- Can also use npm/yarn as fallback, but bun is preferred
+- Dev server runs on `localhost:8080` with HMR overlay disabled for better UX
+
 ### Import Aliases
 - Use `@/` prefix for src imports (configured in vite.config.ts and tsconfig.json)
 - Example: `import Layout from "@/components/layout/Layout"`
 
+### Vite Development Features
+- **Component Tagger**: In development mode, uses `lovable-tagger` plugin for component analysis (see vite.config.ts)
+- **IPv6 Support**: Dev server configured to bind to `::` (IPv6) for better networking compatibility
+- **HMR Overlay**: Disabled (`overlay: false`) to avoid intrusive error overlays during development
+
 ### Testing Setup
-- **Framework**: Vitest with jsdom environment
+- **Framework**: Vitest with jsdom environment (configured in vitest.config.ts)
 - **Setup**: [src/test/setup.ts](src/test/setup.ts) includes Testing Library DOM matchers and matchMedia mock
 - **Pattern**: Tests in same directory as components with `.test.ts` or `.spec.ts` suffix
 - **Reference**: [src/test/example.test.ts](src/test/example.test.ts)
+- **Global test utilities**: `globals: true` means test functions (`describe`, `it`, `expect`) available without imports
 
 ## Code Standards & Conventions
 
@@ -85,15 +96,23 @@ npm run preview      # Preview production build locally
 
 ### Key Libraries to Know
 - **@hookform/resolvers**: Form validation bridge between react-hook-form and zod
-- **embla-carousel**: Carousel functionality (imported in package.json)
+- **embla-carousel-react**: Carousel functionality for rotating content/galleries
 - **next-themes**: Theme switching support (dark mode ready)
-- **vaul**: Drawer component functionality
+- **vaul**: Drawer component functionality from Radix
 - **react-resizable-panels**: Layout resizable panels
-- **date-fns + react-day-picker**: Date selection components
+- **date-fns + react-day-picker**: Date selection and manipulation
+- **cmdk**: Command palette / combobox UI (Radix-based)
+- **input-otp**: OTP input field specialized component
+
+### React Query Setup & Patterns
+- **Configuration**: `QueryClient` instantiated in [App.tsx](src/App.tsx) and wrapped as `QueryClientProvider`
+- **Usage pattern**: Use `useQuery` hooks for async data fetching, `useMutation` for mutations
+- **No backend currently**: Codebase shows no active API integrations yet - add endpoints via React Query when building features
+- **Data flow**: All server state should flow through React Query, not useState, for consistency
 
 ### API/Data Integration
-- React Query is configured for server data - use `useQuery` hooks for async operations
 - No backend API calls visible in current codebase - add via React Query when integrating API
+- QueryClient is pre-configured and available to all components via provider wrapper
 
 ## Common Development Tasks
 

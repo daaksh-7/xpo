@@ -20,7 +20,7 @@ const Footer = () => {
             </p>
             <div className="flex items-center gap-4 mt-6">
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/in/xops-club-ju-fet/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
@@ -29,7 +29,7 @@ const Footer = () => {
                 <Linkedin className="h-5 w-5" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/xops.club_ju/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
@@ -38,12 +38,24 @@ const Footer = () => {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="mailto:contact@xops.dev"
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=xopsclub.cse.ju@gmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="Email"
               >
                 <Mail className="h-5 w-5" />
               </a>
+            </div>
+            
+            {/* Jain Logo */}
+            <div className="-mt-2 flex items-center">
+              <img 
+                src="/jain logo.jpg" 
+                alt="Jain Symbol" 
+                className="h-40 w-56 object-contain"
+                style={{ mixBlendMode: 'darken', filter: 'brightness(0.95) contrast(1.8) saturate(1.5) hue-rotate(0deg)' }}
+              />
             </div>
           </div>
 
