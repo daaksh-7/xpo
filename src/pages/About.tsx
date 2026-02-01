@@ -8,11 +8,6 @@ const values = [
     description: "We push boundaries and explore emerging technologies to stay ahead of the curve.",
   },
   {
-    icon: Users,
-    title: "Community",
-    description: "We believe in the power of collaboration and supporting each other's growth.",
-  },
-  {
     icon: Target,
     title: "Excellence",
     description: "We strive for quality in everything we do, from events to projects.",
@@ -26,46 +21,60 @@ const values = [
 
 const teamMembers = [
   {
-    name: "Alex Chen",
-    role: "President",
-    bio: "Full-stack developer passionate about AI and open source.",
+    name: "Shreyas S",
+    role: "Club Lead",
+    bio: "Leading the shift to autonomous DevOps.",
     avatar: "👨‍💻",
-    socials: { github: "#", linkedin: "#", twitter: "#" },
+    socials: { linkedin: "https://www.linkedin.com/in/shreyas-s-357056327?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
   {
-    name: "Sarah Johnson",
-    role: "Vice President",
-    bio: "Cloud architect with a love for DevOps and automation.",
+    name: "Lakshitha A",
+    role: "Club Co-Lead",
+    bio: "Accelerating team growth and AI integration.",
     avatar: "👩‍💻",
-    socials: { github: "#", linkedin: "#", twitter: "#" },
+    socials: { linkedin: "https://www.linkedin.com/in/lakshitha-a-b16090330?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
   {
-    name: "Mike Williams",
-    role: "Tech Lead",
-    bio: "Systems engineer focused on cybersecurity and blockchain.",
+    name: "Saksham Singh",
+    role: "Technical Lead",
+    bio: "Debugging the future with AI-enhanced workflows.",
     avatar: "🧑‍💻",
-    socials: { github: "#", linkedin: "#", twitter: "#" },
+    socials: { linkedin: "https://www.linkedin.com/in/saksham-singh-94658b322/" },
   },
   {
-    name: "Emily Davis",
-    role: "Events Coordinator",
-    bio: "Project manager who brings people together through amazing events.",
-    avatar: "👩‍🎨",
-    socials: { github: "#", linkedin: "#", twitter: "#" },
+    name: "Thulasi Sri Nidhi",
+    role: "Technical Co-Lead",
+    bio: "Building the pipelines that power the club.",
+    avatar: "👩‍💻",
+    socials: { linkedin: "https://www.linkedin.com/in/thulasi-sri-nidhi-ba17a3382?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
   {
-    name: "James Lee",
-    role: "Workshop Lead",
-    bio: "Educator at heart, specializing in web development training.",
-    avatar: "👨‍🏫",
-    socials: { github: "#", linkedin: "#", twitter: "#" },
+    name: "Thavanidhi V P",
+    role: "Event & Outreach Lead",
+    bio: "Bridging the gap between AI tech and the student community.",
+    avatar: "👩‍💻",
+    socials: { linkedin: "https://www.linkedin.com/in/thavanidhi-v-p-1a797136a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" },
   },
   {
-    name: "Lisa Wang",
-    role: "Community Manager",
-    bio: "Building connections and fostering an inclusive tech community.",
-    avatar: "👩‍🚀",
-    socials: { github: "#", linkedin: "#", twitter: "#" },
+    name: "Sujay V",
+    role: "Event & Outreach Co-Lead",
+    bio: "Expanding the ecosystem for the next gen of DevOps.",
+    avatar: "🧑‍💻",
+    socials: { linkedin: "https://www.linkedin.com/in/sujayv26?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
+  },
+  {
+    name: "Aniruddh V N",
+    role: "Treasurer",
+    bio: "Managing resources for a high-performance tech future.",
+    avatar: "🧑‍💻",
+    socials: { linkedin: "https://www.linkedin.com/in/aniruddh-v-n-5b7124340?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
+  },
+  {
+    name: "Divyashree M",
+    role: "Co-Treasurer",
+    bio: "Financial operations for sustainable tech growth.",
+    avatar: "👩‍💻",
+    socials: { linkedin: "https://www.linkedin.com/in/divyashree-m-11a334326?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
 ];
 
@@ -210,27 +219,33 @@ const About = () => {
                 <p className="text-muted-foreground text-sm mb-4">{member.bio}</p>
                 
                 <div className="flex items-center justify-center gap-4">
-                  <a
-                    href={member.socials.github}
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    aria-label={`${member.name}'s GitHub`}
-                  >
-                    <Github className="h-4 w-4" />
-                  </a>
-                  <a
-                    href={member.socials.linkedin}
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    aria-label={`${member.name}'s LinkedIn`}
-                  >
-                    <Linkedin className="h-4 w-4" />
-                  </a>
-                  <a
-                    href={member.socials.twitter}
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    aria-label={`${member.name}'s Twitter`}
-                  >
-                    <Twitter className="h-4 w-4" />
-                  </a>
+                  {member.socials.github && (
+                    <a
+                      href={member.socials.github}
+                      className="text-muted-foreground hover:text-primary transition-colors"
+                      aria-label={`${member.name}'s GitHub`}
+                    >
+                      <Github className="h-4 w-4" />
+                    </a>
+                  )}
+                  {member.socials.linkedin && (
+                    <a
+                      href={member.socials.linkedin}
+                      className="text-muted-foreground hover:text-primary transition-colors"
+                      aria-label={`${member.name}'s LinkedIn`}
+                    >
+                      <Linkedin className="h-4 w-4" />
+                    </a>
+                  )}
+                  {member.socials.twitter && (
+                    <a
+                      href={member.socials.twitter}
+                      className="text-muted-foreground hover:text-primary transition-colors"
+                      aria-label={`${member.name}'s Twitter`}
+                    >
+                      <Twitter className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
