@@ -9,8 +9,8 @@ const Footer = () => {
           {/* Brand */}
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center gap-2 text-xl font-bold mb-4">
-              <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/30">
-                <Zap className="h-5 w-5 text-primary" />
+              <div className="rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center" style={{ width: 48, height: 48 }}>
+                <img src="/X-Ops Club logo design.png" alt="X-Ops Club Logo" className="w-12 h-12 object-contain m-0" />
               </div>
               <span className="text-gradient">X-Ops</span>
             </Link>

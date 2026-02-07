@@ -5,18 +5,25 @@ const values = [
   {
     icon: Lightbulb,
     title: "Innovation",
-    description: "We push boundaries and explore emerging technologies to stay ahead of the curve.",
+    description: "JU-FET and XOps Club foster innovation by providing hands-on learning, state-of-the-art labs, and opportunities to master the latest technologies through real projects and hackathons.",
   },
   {
     icon: Target,
     title: "Excellence",
-    description: "We strive for quality in everything we do, from events to projects.",
+    description: "Driven by visionary leadership and expert faculty, we focus on holistic student growth, world-class education, and a culture of excellence that prepares members for global tech success.",
   },
   {
     icon: Heart,
     title: "Inclusivity",
-    description: "We welcome everyone, regardless of skill level or background.",
+    description: "We welcome everyone, regardless of skill level or background, and encourage participation in co-curricular and extra-curricular activities.",
   },
+];
+
+// Our Mission section (short)
+const missionPoints = [
+  "Deliver world-class, industry-relevant education and practical skills for a smooth transition from academics to industry.",
+  "Empower students to excel in AI, DevOps, and automation through hands-on challenges and mentorship.",
+  "Promote a dynamic, innovative environment that values teamwork, leadership, and continuous learning."
 ];
 
 const teamMembers = [
@@ -79,13 +86,37 @@ const teamMembers = [
 ];
 
 const milestones = [
-  { year: "2020", title: "Founded", description: "X-Ops was born with just 12 founding members." },
-  { year: "2021", title: "First Hackathon", description: "Hosted our first hackathon with 100+ participants." },
-  { year: "2022", title: "500 Members", description: "Reached 500 active members milestone." },
-  { year: "2023", title: "Industry Partners", description: "Partnered with 10+ tech companies for workshops." },
-  { year: "2024", title: "Virtual Expansion", description: "Launched online events reaching global audience." },
-  { year: "2025", title: "Innovation Lab", description: "Opened our first dedicated innovation lab space." },
-];
+    {
+      year: "JU-FET",
+      title: "JAIN (Deemed-to-be University), Faculty of Engineering & Technology",
+      description:
+        "JU-FET is a top Bengaluru engineering institute, offering practical, industry-focused UG and PG programs.",
+    },
+    {
+      year: "CSE Dept.",
+      title: "Department of Computer Science and Engineering",
+      description:
+        "CSE drives innovation and research, preparing students for global tech careers with hands-on learning.",
+    },
+    {
+      year: "XOps Club",
+      title: "XOps Club at JU-FET",
+      description:
+        "XOps Club empowers students in AI and DevOps through real-world projects, hackathons, and teamwork.",
+    },
+    {
+      year: "Vision",
+      title: "Leadership & Culture of Excellence",
+      description:
+        "JU-FET and XOps Club promote innovation, teamwork, and excellence for global tech success.",
+    },
+    {
+      year: "Mission",
+      title: "Driving Automation & Innovation",
+      description:
+        "XOps Club advances automation, teamwork, and innovation—delivering real tech impact through DevOps, XOps, and strong mentorship.",
+    },
+  ];
 
 const About = () => {
   return (
@@ -99,9 +130,37 @@ const About = () => {
               About <span className="text-gradient">X-Ops</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              We're a community of passionate developers, designers, and tech enthusiasts 
-              dedicated to learning, building, and innovating together.
+              X-Ops Club is a student-led community at JU-FET dedicated to advancing DevOps, AI, and automation through hands-on learning, collaboration, and innovation.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Mentorship Section */}
+      <section className="py-8">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="inline-block px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-3">
+              <span className="font-semibold text-primary">Acknowledging Our Mentors</span>
+            </div>
+            <div className="mb-2">
+              <h3 className="text-xl font-bold mb-1">Dr. J. Somaesekar</h3>
+              <p className="text-muted-foreground text-sm">
+                Program Head &mdash; guiding X-Ops Club with strategic vision, academic leadership, and unwavering support.
+              </p>
+            </div>
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold mb-1">Prof. Vaibhav Prabhakar Raibole</h3>
+              <p className="text-muted-foreground text-sm">
+                Club Coordinator &mdash; providing mentorship, insight, and encouragement for the club’s growth and success.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Dr. S Prakash</h3>
+              <p className="text-muted-foreground text-sm">
+                Training & Placement Coordinator &mdash; supporting student participation and discipline through guidance and motivation.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -163,7 +222,6 @@ const About = () => {
           <div className="relative max-w-4xl mx-auto">
             {/* Timeline line */}
             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2 hidden md:block" />
-            
             <div className="space-y-8">
               {milestones.map((milestone, index) => (
                 <div
@@ -173,19 +231,17 @@ const About = () => {
                   } animate-fade-in-up`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className={`flex-1 ${index % 2 === 0 ? "md:text-right" : "md:text-left"}`}>
+                  <div className={`flex-1 ${index % 2 === 0 ? "md:text-right" : "md:text-left"}`}> 
                     <div className="glass p-6 rounded-xl inline-block">
                       <span className="text-primary font-mono font-bold">{milestone.year}</span>
                       <h3 className="font-semibold mt-1">{milestone.title}</h3>
                       <p className="text-sm text-muted-foreground mt-1">{milestone.description}</p>
                     </div>
                   </div>
-                  
                   {/* Center dot */}
                   <div className="hidden md:flex items-center justify-center">
                     <div className="w-4 h-4 rounded-full bg-primary glow-primary" />
                   </div>
-                  
                   <div className="flex-1 hidden md:block" />
                 </div>
               ))}

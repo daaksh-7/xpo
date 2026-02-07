@@ -55,18 +55,6 @@ const events: Event[] = [
     maxAttendees: 100,
     image: "☁️",
   },
-  {
-    id: 6,
-    title: "Cybersecurity Fundamentals",
-    description: "Essential security practices for developers. Learn about common vulnerabilities and how to prevent them.",
-    date: "April 12, 2026",
-    time: "3:00 PM - 6:00 PM",
-    location: "Security Lab",
-    type: "workshop",
-    attendees: 32,
-    maxAttendees: 45,
-    image: "🔐",
-  },
 ];
 
 const eventTypes: { value: EventType; label: string }[] = [
