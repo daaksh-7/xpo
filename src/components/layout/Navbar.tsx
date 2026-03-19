@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Zap } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -13,6 +14,7 @@ const navLinks = [
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -42,12 +44,24 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            <Button variant="ghost" asChild>
-              <Link to="/login">Log in</Link>
-            </Button>
-            <Button variant="hero" asChild>
-              <Link to="/signup">Join X-Ops</Link>
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <span className="text-sm text-muted-foreground">Hi, {user?.name}</span>
+                <Button variant="ghost" onClick={logout} className="gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/login">Log in</Link>
+                </Button>
+                <Button variant="hero" asChild>
+                  <Link to="/signup">Join X-Ops</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -84,12 +98,28 @@ const Navbar = () => {
               </Link>
             ))}
             <div className="flex flex-col gap-2 mt-4 px-4">
-              <Button variant="ghost" asChild className="justify-center">
-                <Link to="/login" onClick={() => setIsOpen(false)}>Log in</Link>
-              </Button>
-              <Button variant="hero" asChild className="justify-center">
-                <Link to="/signup" onClick={() => setIsOpen(false)}>Join X-Ops</Link>
-              </Button>
+              {isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  className="justify-center gap-2"
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log out
+                </Button>
+              ) : (
+                <>
+                  <Button variant="ghost" asChild className="justify-center">
+                    <Link to="/login" onClick={() => setIsOpen(false)}>Log in</Link>
+                  </Button>
+                  <Button variant="hero" asChild className="justify-center">
+                    <Link to="/signup" onClick={() => setIsOpen(false)}>Join X-Ops</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

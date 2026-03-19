@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Zap, ArrowRight, Check } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { isAuthApiError, signupUser } from "@/lib/authApi";
+import { useAuth } from "@/contexts/AuthContext";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
@@ -35,6 +37,7 @@ const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setSession } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,17 +59,28 @@ const Signup = () => {
     }
 
     setIsLoading(true);
-    
-    // Simulate signup - replace with actual auth logic
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Welcome to X-Ops!",
-      description: "Your account has been created successfully.",
-    });
-    
-    setIsLoading(false);
-    navigate("/");
+
+    try {
+      const response = await signupUser({ name, email, password });
+      setSession(response);
+
+      toast({
+        title: "Welcome to X-Ops!",
+        description: "Your account has been created successfully.",
+      });
+
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Account creation failed",
+        description: isAuthApiError(error)
+          ? error.message
+          : "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

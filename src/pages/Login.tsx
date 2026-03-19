@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Zap, ArrowRight } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { isAuthApiError, loginUser } from "@/lib/authApi";
+import { useAuth } from "@/contexts/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -19,7 +21,17 @@ const Login = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const { setSession } = useAuth();
+
+  const redirectPath =
+    typeof location.state === "object" &&
+    location.state !== null &&
+    "from" in location.state &&
+    typeof location.state.from === "string"
+      ? location.state.from
+      : "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,17 +50,28 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    
-    // Simulate login - replace with actual auth logic
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Welcome back!",
-      description: "You have successfully logged in to X-Ops.",
-    });
-    
-    setIsLoading(false);
-    navigate("/");
+
+    try {
+      const response = await loginUser({ email, password });
+      setSession(response);
+
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in to X-Ops.",
+      });
+
+      navigate(redirectPath, { replace: true });
+    } catch (error) {
+      toast({
+        title: "Sign in failed",
+        description: isAuthApiError(error)
+          ? error.message
+          : "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
