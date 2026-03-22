@@ -52,6 +52,11 @@ const socialLinks = [
   },
 ];
 
+type SocialLink = {
+  label: string;
+  href: string;
+};
+
 const parseJsonArray = <T,>(value: string, fallback: T[]): T[] => {
   try {
     const parsed = JSON.parse(value);
@@ -63,7 +68,10 @@ const parseJsonArray = <T,>(value: string, fallback: T[]): T[] => {
 
 const Index = () => {
   const content = useCmsContent();
-  const dynamicSocialLinks = parseJsonArray(content.social_links_json, socialLinks);
+  const dynamicSocialLinks = parseJsonArray<SocialLink>(
+    content.social_links_json,
+    socialLinks.map(({ label, href }) => ({ label, href }))
+  );
 
   const stats = [
     { value: content.home_stat_members, label: "Members" },
@@ -118,7 +126,15 @@ const Index = () => {
             </div>
 
             <div className="mt-8 flex items-center justify-center gap-3 animate-fade-in-up stagger-3">
-              {dynamicSocialLinks.map((social) => (
+              {dynamicSocialLinks.map((social) => {
+                const Icon =
+                  social.label === "LinkedIn"
+                    ? Linkedin
+                    : social.label === "Instagram"
+                      ? Instagram
+                      : Mail;
+
+                return (
                 <a
                   key={social.label}
                   href={social.href}
@@ -127,9 +143,10 @@ const Index = () => {
                   aria-label={social.label}
                   className="h-10 w-10 rounded-full border border-border/60 bg-card/60 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all"
                 >
-                  <social.icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5" />
                 </a>
-              ))}
+                );
+              })}
             </div>
 
             <div className="grid grid-cols-3 gap-8 mt-12 pt-12 border-t border-border/50 animate-fade-in-up">
