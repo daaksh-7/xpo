@@ -4,8 +4,6 @@ import { Calendar, Clock, MapPin, Users, ArrowRight, Search, Filter } from "luci
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useCmsContent } from "@/hooks/useCmsContent";
-import { defaultCmsContent } from "@/lib/cms";
 
 type EventType = "all" | "workshop" | "hackathon" | "bootcamp" | "meetup";
 
@@ -29,7 +27,7 @@ interface Event {
   moreInfo?: string;
 }
 
-const defaultEvents: Event[] = [
+const events: Event[] = [
   {
     id: 1,
     title: "🚀 GET FREE ORACLE & MICROSOFT CERTIFICATIONS! 🚀",
@@ -82,20 +80,6 @@ const defaultEvents: Event[] = [
   },
 ];
 
-const parseEvents = (raw: string): Event[] => {
-  try {
-    const parsed = JSON.parse(raw);
-
-    if (!Array.isArray(parsed)) {
-      return defaultEvents;
-    }
-
-    return parsed as Event[];
-  } catch {
-    return defaultEvents;
-  }
-};
-
 const eventTypes: { value: EventType; label: string }[] = [
   { value: "all", label: "All Events" },
   { value: "workshop", label: "Workshops" },
@@ -111,8 +95,6 @@ import Layout from "@/components/layout/Layout";
 const Events = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<EventType>("all");
-  const content = useCmsContent();
-  const events = parseEvents(content.events_json || defaultCmsContent.events_json);
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
