@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 type EventType = "all" | "workshop" | "hackathon" | "bootcamp" | "meetup";
 
 interface Event {
-  id: number | string;
+  id: number;
   title: string;
   description: string;
   date: string;
