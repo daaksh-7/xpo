@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
+import { setAuthSession, type AuthSession } from "@/lib/auth";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
@@ -56,17 +58,31 @@ const Signup = () => {
     }
 
     setIsLoading(true);
-    
-    // Simulate signup - replace with actual auth logic
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Welcome to X-Ops!",
-      description: "Your account has been created successfully.",
-    });
-    
-    setIsLoading(false);
-    navigate("/");
+
+    try {
+      const data = await api.post<AuthSession>("/api/auth/signup", {
+        name,
+        email,
+        password,
+      });
+
+      setAuthSession(data);
+
+      toast({
+        title: "Welcome to X-Ops!",
+        description: "Your account has been created successfully.",
+      });
+
+      navigate(data.user.role === "admin" ? "/admin" : "/");
+    } catch (error) {
+      toast({
+        title: "Signup failed",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

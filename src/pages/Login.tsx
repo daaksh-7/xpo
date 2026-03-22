@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { api } from "@/lib/api";
+import { setAuthSession, type AuthSession } from "@/lib/auth";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -38,17 +40,30 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    
-    // Simulate login - replace with actual auth logic
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Welcome back!",
-      description: "You have successfully logged in to X-Ops.",
-    });
-    
-    setIsLoading(false);
-    navigate("/");
+
+    try {
+      const data = await api.post<AuthSession>("/api/auth/login", {
+        email,
+        password,
+      });
+
+      setAuthSession(data);
+
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in to X-Ops.",
+      });
+
+      navigate(data.user.role === "admin" ? "/admin" : "/");
+    } catch (error) {
+      toast({
+        title: "Sign in failed",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

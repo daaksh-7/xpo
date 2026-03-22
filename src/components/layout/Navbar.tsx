@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { clearAuthSession, getAuthSession } from "@/lib/auth";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -12,9 +13,22 @@ const navLinks = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [role, setRole] = useState<"admin" | "member" | null>(null);
   const location = useLocation();
 
+  useEffect(() => {
+    const session = getAuthSession();
+    setRole(session?.user.role ?? null);
+  }, [location.pathname]);
+
   const isActive = (path: string) => location.pathname === path;
+  const isLoggedIn = Boolean(role);
+
+  const handleLogout = () => {
+    clearAuthSession();
+    setRole(null);
+    setIsOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
@@ -42,12 +56,25 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            <Button variant="ghost" asChild>
-              <Link to="/login">Log in</Link>
-            </Button>
-            <Button variant="hero" asChild>
-              <Link to="/signup">Join X-Ops</Link>
-            </Button>
+            {role === "admin" && (
+              <Button variant="outline" asChild>
+                <Link to="/admin">Admin</Link>
+              </Button>
+            )}
+            {isLoggedIn ? (
+              <Button variant="ghost" asChild>
+                <Link to="/" onClick={handleLogout}>Logout</Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/login">Log in</Link>
+                </Button>
+                <Button variant="hero" asChild>
+                  <Link to="/signup">Join X-Ops</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -84,12 +111,25 @@ const Navbar = () => {
               </Link>
             ))}
             <div className="flex flex-col gap-2 mt-4 px-4">
-              <Button variant="ghost" asChild className="justify-center">
-                <Link to="/login" onClick={() => setIsOpen(false)}>Log in</Link>
-              </Button>
-              <Button variant="hero" asChild className="justify-center">
-                <Link to="/signup" onClick={() => setIsOpen(false)}>Join X-Ops</Link>
-              </Button>
+              {role === "admin" && (
+                <Button variant="outline" asChild className="justify-center">
+                  <Link to="/admin" onClick={() => setIsOpen(false)}>Admin Panel</Link>
+                </Button>
+              )}
+              {isLoggedIn ? (
+                <Button variant="ghost" asChild className="justify-center">
+                  <Link to="/" onClick={handleLogout}>Logout</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="ghost" asChild className="justify-center">
+                    <Link to="/login" onClick={() => setIsOpen(false)}>Log in</Link>
+                  </Button>
+                  <Button variant="hero" asChild className="justify-center">
+                    <Link to="/signup" onClick={() => setIsOpen(false)}>Join X-Ops</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@
               ))}
             </div>
 import { Link } from "react-router-dom";
-import { ArrowRight, Code2, Users, Calendar, Sparkles, Terminal, Cpu } from "lucide-react";
+import { ArrowRight, Code2, Users, Calendar, Sparkles, Cpu, Linkedin, Instagram, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -50,6 +50,24 @@ const upcomingEvents = [
     title: "Cloud Computing 101",
     date: "Mar 20, 2026",
     type: "Bootcamp",
+  },
+];
+
+const socialLinks = [
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/xops-club-ju-fet/",
+    icon: Linkedin,
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/xops.club_ju/",
+    icon: Instagram,
+  },
+  {
+    label: "Email",
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=xopsclub.cse.ju@gmail.com",
+    icon: Mail,
   },
 ];
 
@@ -102,10 +120,26 @@ const Index = () => {
               </Button>
             </div>
 
+            {/* Social media logos */}
+            <div className="mt-8 flex items-center justify-center gap-3 animate-fade-in-up stagger-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="h-10 w-10 rounded-full border border-border/60 bg-card/60 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all"
+                >
+                  <social.icon className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
+
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 mt-16 pt-16 border-t border-border/50 animate-fade-in-up stagger-3">
+            <div className="grid grid-cols-3 gap-8 mt-12 pt-12 border-t border-border/50 animate-fade-in-up">
               {[
-                { value: "20+", label: "Members" },
+                { value: "30+", label: "Members" },
                 { value: "1+", label: "Events Hosted" },
                 { value: "3+", label: "Partners" },
               ].map((stat) => (
@@ -159,7 +193,7 @@ const Index = () => {
               Ready to Start Your <span className="text-gradient">Tech Journey?</span>
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto mb-8">
-              Join our community of 20+ members and get access to exclusive events, 
+              Join our community of 30+ members and get access to exclusive events, 
               workshops, and networking opportunities.
             </p>
             <Button variant="gradient" size="xl" asChild>

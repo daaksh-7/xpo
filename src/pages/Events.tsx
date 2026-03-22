@@ -20,6 +20,9 @@ interface Event {
   image: string;
   featured?: boolean;
   joinLink?: string;
+  registrationClosed?: boolean;
+  hideDate?: boolean;
+  hideAttendees?: boolean;
   speaker?: string;
   moreInfo?: string;
 }
@@ -41,7 +44,25 @@ const events: Event[] = [
     image: "🎓",
     featured: true,
     joinLink: "https://meet.google.com/bvp-cytn-iwj",
+    registrationClosed: true,
     speaker: "Dr. Rajesh Bingu Ph.D.",
+  },
+  {
+    id: 2,
+    title: "Chaos or Release",
+    description:
+      "A fun, non-technical decision-making game where teams tackle real-world scenarios and race to prevent system failures.",
+    moreInfo:
+      "Hello everyone! We are from the XOps Club.\n\nThe XOps Club presents 'Chaos or Release,' held on 25 March 2026 in Seminar Hall 002.\n\nNo coding experience is needed. This is a fun decision-making game, not a technical one.\n\nTeam size: 3 members per team.\n\nYou will be given real-world scenario-based questions, and your team must decide within the allotted time.\n\nEarn the most points by making smart choices to avoid system failures!",
+    date: "March 25, 2026 (Wednesday)",
+    time: "TBA",
+    location: "Seminar Hall 002",
+    type: "meetup",
+    attendees: 0,
+    maxAttendees: 120,
+    image: "🎯",
+    featured: true,
+    joinLink: "https://docs.google.com/forms/d/e/1FAIpQLScSSH4TaQ_ojWLoLimaA2CEIoYF9Eu-wonyWt77BEhB3YSkaw/viewform",
   },
   {
     id: 3,
@@ -54,6 +75,8 @@ const events: Event[] = [
     attendees: 80,
     maxAttendees: 100,
     image: "☁️",
+    hideDate: true,
+    hideAttendees: true,
   },
 ];
 
@@ -193,9 +216,21 @@ const Events = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant={event.id === 1 ? "default" : "hero"} className={event.id === 1 ? "flex-1 bg-gray-400 cursor-not-allowed text-white font-bold" : "flex-1"} disabled={event.id === 1}>
-                          Registration Closed
-                        </Button>
+                        {event.registrationClosed ? (
+                          <Button variant="default" className="flex-1 bg-gray-400 cursor-not-allowed text-white font-bold" disabled>
+                            Registration Closed
+                          </Button>
+                        ) : event.joinLink ? (
+                          <Button asChild variant="hero" className="flex-1">
+                            <a href={event.joinLink} target="_blank" rel="noopener noreferrer">
+                              Register Now
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button variant="hero" className="flex-1" disabled>
+                            Registration Opening Soon
+                          </Button>
+                        )}
                         {event.moreInfo && (
                           <Dialog>
                             <DialogTrigger asChild>
@@ -262,34 +297,52 @@ const Events = () => {
                       </div>
                     )}
                     <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        {event.date}
-                      </div>
+                      {!event.hideDate && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-primary" />
+                          {event.date}
+                        </div>
+                      )}
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-primary" />
                         {event.location}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-primary" />
-                        {event.attendees}/{event.maxAttendees} attending
-                      </div>
+                      {!event.hideAttendees && (
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-primary" />
+                          {event.attendees}/{event.maxAttendees} attending
+                        </div>
+                      )}
                     </div>
 
                     {/* Progress bar for spots */}
-                    <div className="mb-4">
-                      <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${(event.attendees / event.maxAttendees) * 100}%` }}
-                        />
+                    {!event.hideAttendees && (
+                      <div className="mb-4">
+                        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all"
+                            style={{ width: `${(event.attendees / event.maxAttendees) * 100}%` }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="flex gap-2">
-                      <Button variant="hero-outline" className="flex-1">
-                        Register
-                      </Button>
+                      {event.registrationClosed ? (
+                        <Button variant="default" className="flex-1 bg-gray-400 cursor-not-allowed text-white font-bold" disabled>
+                          Registration Closed
+                        </Button>
+                      ) : event.joinLink ? (
+                        <Button asChild variant="hero-outline" className="flex-1">
+                          <a href={event.joinLink} target="_blank" rel="noopener noreferrer">
+                            Register
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button variant="hero-outline" className="flex-1" disabled>
+                          Registration Opening Soon
+                        </Button>
+                      )}
                       {event.moreInfo && (
                         <Dialog>
                           <DialogTrigger asChild>
