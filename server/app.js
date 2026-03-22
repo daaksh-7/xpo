@@ -156,6 +156,14 @@ app.use(express.json());
 
 const normalizeEmail = (email) => email.trim().toLowerCase();
 
+const getRoleForEmail = (email) => {
+  if (!adminEmail) {
+    return "member";
+  }
+
+  return normalizeEmail(email) === adminEmail ? "admin" : "member";
+};
+
 const sanitizeUser = (user) => ({
   id: user.id,
   name: user.name,
@@ -238,13 +246,7 @@ const readUsers = async () => {
     const users = Array.isArray(parsed) ? parsed : [];
 
     for (const user of users) {
-      if (!user.role) {
-        user.role = "member";
-      }
-    }
-
-    if (users.length > 0 && !users.some((user) => user.role === "admin")) {
-      users[0].role = "admin";
+      user.role = getRoleForEmail(user.email);
     }
 
     return users;
@@ -367,6 +369,7 @@ app.post("/api/auth/signup", async (req, res) => {
     if (existingUser) {
       existingUser.name = name;
       existingUser.passwordHash = await bcrypt.hash(password, 10);
+      existingUser.role = getRoleForEmail(existingUser.email);
 
       await writeUsers(users);
 
@@ -377,8 +380,7 @@ app.post("/api/auth/signup", async (req, res) => {
       });
     }
 
-    const hasAnyAdmin = users.some((user) => user.role === "admin");
-    const role = !hasAnyAdmin || (adminEmail && email === adminEmail) ? "admin" : "member";
+    const role = getRoleForEmail(email);
 
     const passwordHash = await bcrypt.hash(password, 10);
     const newUser = {
@@ -425,6 +427,9 @@ app.post("/api/auth/login", async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
+
+    user.role = getRoleForEmail(user.email);
+    await writeUsers(users);
 
     return res.status(200).json({
       message: "Login successful.",

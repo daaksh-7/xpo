@@ -13,6 +13,14 @@ const JWT_SECRET = process.env.JWT_SECRET || "change-this-secret-in-production";
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").toLowerCase();
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "";
 
+function getRoleForEmail(email) {
+  if (!ADMIN_EMAIL) {
+    return "member";
+  }
+
+  return String(email).toLowerCase().trim() === ADMIN_EMAIL ? "admin" : "member";
+}
+
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is required. Use a Supabase Postgres connection string.");
 }
@@ -273,9 +281,10 @@ app.post("/api/auth/signup", async (req, res) => {
     const passwordHash = await bcrypt.hash(String(password), 10);
 
     if (existing.rows[0]) {
+      const enforcedRole = getRoleForEmail(normalizedEmail);
       await db.query(
-        "UPDATE users SET name = $1, password_hash = $2 WHERE id = $3",
-        [normalizedName, passwordHash, existing.rows[0].id]
+        "UPDATE users SET name = $1, password_hash = $2, role = $3 WHERE id = $4",
+        [normalizedName, passwordHash, enforcedRole, existing.rows[0].id]
       );
 
       const userResult = await db.query(
@@ -293,11 +302,7 @@ app.post("/api/auth/signup", async (req, res) => {
       });
     }
 
-    const adminCount = await db.query("SELECT COUNT(*)::int as total FROM users WHERE role = 'admin'");
-    const hasAnyAdmin = Number(adminCount.rows[0]?.total ?? 0) > 0;
-    const role = !hasAnyAdmin || (ADMIN_EMAIL ? normalizedEmail === ADMIN_EMAIL : false)
-      ? "admin"
-      : "member";
+    const role = getRoleForEmail(normalizedEmail);
 
     const insert = await db.query(
       "INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, created_at as \"createdAt\"",
@@ -343,6 +348,12 @@ app.post("/api/auth/login", async (req, res) => {
       role: userRecord.role,
       createdAt: userRecord.createdAt,
     };
+
+    const enforcedRole = getRoleForEmail(user.email);
+    if (user.role !== enforcedRole) {
+      await db.query("UPDATE users SET role = $1 WHERE id = $2", [enforcedRole, user.id]);
+      user.role = enforcedRole;
+    }
 
     const token = signToken(user);
     return res.json({ token, user });
@@ -401,9 +412,9 @@ async function start() {
   app.listen(PORT, () => {
     console.log(`API server running on http://localhost:${PORT}`);
     if (ADMIN_EMAIL) {
-      console.log(`Admin signup email: ${ADMIN_EMAIL}`);
+      console.log(`Admin access email: ${ADMIN_EMAIL}`);
     } else {
-      console.log("Admin signup email not set. If no admin exists, the next signup becomes admin.");
+      console.log("ADMIN_EMAIL not set. All users will be regular members.");
     }
   });
 }
