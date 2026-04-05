@@ -1,9 +1,5 @@
 import { getAuthSession } from "@/lib/auth";
 
-const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
-
-const withApiBaseUrl = (path: string) => `${configuredApiBaseUrl}${path}`;
-
 type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
@@ -11,9 +7,8 @@ type RequestOptions = {
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const session = getAuthSession();
-  const requestUrl = configuredApiBaseUrl ? withApiBaseUrl(path) : path;
 
-  const response = await fetch(requestUrl, {
+  const response = await fetch(path, {
     method: options.method ?? "GET",
     headers: {
       "Content-Type": "application/json",
@@ -36,5 +31,4 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body: unknown) => request<T>(path, { method: "POST", body }),
-  put: <T>(path: string, body: unknown) => request<T>(path, { method: "PUT", body }),
 };
