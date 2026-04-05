@@ -11,10 +11,6 @@ import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { setAuthSession, type AuthSession } from "@/lib/auth";
 
-type SignupResponse = AuthSession & {
-  message?: string;
-};
-
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -64,7 +60,7 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const data = await api.post<SignupResponse>("/api/auth/signup", {
+      const data = await api.post<AuthSession>("/api/auth/signup", {
         name,
         email,
         password,
@@ -74,7 +70,7 @@ const Signup = () => {
 
       toast({
         title: "Welcome to X-Ops!",
-        description: data.message || "Your account has been created successfully.",
+        description: "Your account has been created successfully.",
       });
 
       navigate(data.user.role === "admin" ? "/admin" : "/");

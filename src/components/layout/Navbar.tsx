@@ -4,30 +4,16 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { clearAuthSession, getAuthSession } from "@/lib/auth";
-import { defaultCmsContent } from "@/lib/cms";
-import { useCmsContent } from "@/hooks/useCmsContent";
 
-const defaultNavLinks = [
+const navLinks = [
   { name: "Home", path: "/" },
   { name: "Events", path: "/events" },
-  { name: "Gallery", path: "/gallery" },
   { name: "About", path: "/about" },
 ];
-
-const parseJsonArray = <T,>(value: string, fallback: T[]): T[] => {
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? (parsed as T[]) : fallback;
-  } catch {
-    return fallback;
-  }
-};
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [role, setRole] = useState<"admin" | "member" | null>(null);
-  const content = useCmsContent();
-  const navLinks = parseJsonArray(content.navbar_links_json, defaultNavLinks);
   const location = useLocation();
 
   useEffect(() => {
@@ -50,7 +36,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-0">
-            <img src={content.logo_nav_url || defaultCmsContent.logo_nav_url} alt="X-Ops Logo" className="h-28 w-28" />
+            <img src="/favicon.ico" alt="X-Ops Logo" className="h-28 w-28" />
             <span className="hidden sm:inline font-bold text-lg tracking-tight">The X-Ops Club</span>
           </Link>
 
