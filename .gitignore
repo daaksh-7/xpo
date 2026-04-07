@@ -28,3 +28,4 @@ dist-ssr
 data/*.db
 data/
 .vercel_env_check.txt
+.vercel/

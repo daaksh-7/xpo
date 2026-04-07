@@ -1,5 +1,6 @@
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { getAuthSession } from "@/lib/auth";
@@ -67,6 +68,12 @@ const Uploads = () => {
       return;
     }
 
+    if (!isAdmin || !session?.token) {
+      setErrorMessage("Admin access required to upload photos.");
+      event.target.value = "";
+      return;
+    }
+
     if (activeCategory === "uncategorized") {
       setErrorMessage("Choose a category above before uploading.");
       event.target.value = "";
@@ -87,6 +94,9 @@ const Uploads = () => {
     try {
       const response = await fetch(`/api/gallery?category=${encodeURIComponent(activeCategory)}`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+        },
         body: formData,
       });
 
@@ -182,6 +192,20 @@ const Uploads = () => {
             <p className="text-lg text-muted-foreground mt-4">Upload event photos to the shared folder</p>
             <div className="h-1 w-28 rounded-full bg-gradient-to-r from-primary to-accent mx-auto mt-6" />
 
+            {!isAdmin && (
+              <div className="mt-10 glass border border-border/50 rounded-2xl p-6">
+                <p className="text-sm text-muted-foreground">Admin access is required to upload or manage photos.</p>
+                <div className="mt-4 flex items-center justify-center gap-3">
+                  <Button asChild variant="gradient">
+                    <Link to="/login">Log in as Admin</Link>
+                  </Button>
+                  <Button asChild variant="hero-outline">
+                    <Link to="/gallery">View Gallery</Link>
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-wrap items-center justify-center gap-3 mt-10">
               {uploadCategories.map((category) => {
                 const isActive = category.value === activeCategory;
@@ -205,7 +229,7 @@ const Uploads = () => {
               <div className="flex items-center justify-center gap-3">
                 <label
                   htmlFor="uploads-upload"
-                  className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-primary text-primary-foreground text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-primary text-primary-foreground text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-60"
                 >
                   <ImagePlus className="h-4 w-4" />
                   {isUploading ? "Uploading..." : "Upload Photos"}
@@ -217,7 +241,7 @@ const Uploads = () => {
                   multiple
                   className="hidden"
                   onChange={handleUpload}
-                  disabled={isUploading}
+                  disabled={isUploading || !isAdmin}
                 />
                 <Button
                   type="button"

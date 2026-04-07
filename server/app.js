@@ -10,6 +10,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import multer from "multer";
+import { copy, del, list, put } from "@vercel/blob";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +24,7 @@ const usersFilePath = process.env.VERCEL
 const jwtSecret = process.env.JWT_SECRET || "dev-only-change-this-secret";
 const jwtExpiresIn = process.env.JWT_EXPIRES_IN || "7d";
 const adminEmail = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+const adminPassword = process.env.ADMIN_PASSWORD || "";
 const smtpHost = process.env.SMTP_HOST;
 const smtpPort = Number(process.env.SMTP_PORT || 587);
 const smtpSecure = process.env.SMTP_SECURE === "true";
@@ -236,6 +238,21 @@ app.get("/api/health", (_req, res) => {
 
 app.get("/api/auth/me", authenticateRequest, async (req, res) => {
   try {
+    if (req.auth?.sub === "admin" && typeof req.auth?.email === "string") {
+      const email = normalizeEmail(req.auth.email);
+      if (adminEmail && email === adminEmail) {
+        return res.status(200).json({
+          user: sanitizeUser({
+            id: "admin",
+            name: "Admin",
+            email,
+            role: "admin",
+            createdAt: new Date(0).toISOString(),
+          }),
+        });
+      }
+    }
+
     const users = await readUsers();
     const user = users.find((entry) => entry.id === req.auth.sub);
 
@@ -326,6 +343,23 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
+    if (adminEmail && adminPassword && email === adminEmail && password === adminPassword) {
+      const adminUser = {
+        id: "admin",
+        name: "Admin",
+        email,
+        role: "admin",
+        passwordHash: "",
+        createdAt: new Date(0).toISOString(),
+      };
+
+      return res.status(200).json({
+        message: "Login successful.",
+        token: createAuthToken(adminUser),
+        user: sanitizeUser(adminUser),
+      });
+    }
+
     const users = await readUsers();
     const user = users.find((entry) => entry.email === email);
 
@@ -368,6 +402,7 @@ app.get("/api/admin/users", authenticateRequest, requireAdmin, async (_req, res)
 const dataDir = process.env.VERCEL ? path.join("/tmp", "xops-data") : path.resolve("data");
 const uploadsDir = path.join(dataDir, "gallery-uploads");
 const metaDir = path.join(dataDir, "gallery-meta");
+const blobEnabled = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const maxUploadSizeBytes = 8 * 1024 * 1024;
@@ -385,11 +420,13 @@ const ensureGalleryDirectories = async () => {
   }
 };
 
-ensureGalleryDirectories().catch((error) => {
-  console.error("Gallery directory setup failed:", error);
-});
+if (!blobEnabled) {
+  ensureGalleryDirectories().catch((error) => {
+    console.error("Gallery directory setup failed:", error);
+  });
 
-app.use("/uploads", express.static(uploadsDir));
+  app.use("/uploads", express.static(uploadsDir));
+}
 
 const getGalleryCategory = (req) => {
   const raw = req.query?.category;
@@ -483,6 +520,38 @@ app.get("/api/gallery", async (req, res) => {
     return res.status(400).json({ message: "Invalid gallery category." });
   }
 
+  if (blobEnabled) {
+    const prefix = (cat) => `gallery/${cat}/`;
+    const categoriesToList = category
+      ? [category]
+      : [UNCATEGORIZED, ...galleryCategories];
+
+    try {
+      const photos = [];
+      for (const cat of categoriesToList) {
+        const result = await list({ prefix: prefix(cat), limit: 1000 });
+        for (const blob of result.blobs || []) {
+          const filename = blob.pathname.split("/").pop() || blob.pathname;
+          photos.push({
+            id: blob.pathname,
+            name: filename,
+            url: blob.url,
+            mimeType: blob.contentType || guessMimeType(filename),
+            size: blob.size,
+            uploadedAt: new Date(blob.uploadedAt).toISOString(),
+            category: cat,
+          });
+        }
+      }
+
+      photos.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
+      return res.json({ photos });
+    } catch (error) {
+      console.error("Blob gallery list failed:", error);
+      return res.status(500).json({ message: "Could not load gallery photos." });
+    }
+  }
+
   const photos = [];
 
   const scanDir = (dirPath, cat) => {
@@ -524,26 +593,24 @@ app.get("/api/gallery", async (req, res) => {
   return res.json({ photos });
 });
 
-const categorizedStorage = multer.diskStorage({
-  destination: (req, _file, callback) => {
-    const category = getGalleryCategory(req);
-    if (!category || category === "INVALID" || category === UNCATEGORIZED) {
-      return callback(new Error("Please choose a valid gallery category."));
-    }
-    const categoryDir = path.join(uploadsDir, category);
-    if (!fsSync.existsSync(categoryDir)) {
-      fsSync.mkdirSync(categoryDir, { recursive: true });
-    }
-    return callback(null, categoryDir);
-  },
-  filename: (_req, file, callback) => {
-    const ext = path.extname(file.originalname) || ".jpg";
-    callback(null, `${Date.now()}-${crypto.randomUUID()}${ext.toLowerCase()}`);
-  },
-});
-
 const categorizedUpload = multer({
-  storage: categorizedStorage,
+  storage: blobEnabled ? multer.memoryStorage() : multer.diskStorage({
+    destination: (req, _file, callback) => {
+      const category = getGalleryCategory(req);
+      if (!category || category === "INVALID" || category === UNCATEGORIZED) {
+        return callback(new Error("Please choose a valid gallery category."));
+      }
+      const categoryDir = path.join(uploadsDir, category);
+      if (!fsSync.existsSync(categoryDir)) {
+        fsSync.mkdirSync(categoryDir, { recursive: true });
+      }
+      return callback(null, categoryDir);
+    },
+    filename: (_req, file, callback) => {
+      const ext = path.extname(file.originalname) || ".jpg";
+      callback(null, `${Date.now()}-${crypto.randomUUID()}${ext.toLowerCase()}`);
+    },
+  }),
   limits: {
     fileSize: maxUploadSizeBytes,
     files: 10,
@@ -557,7 +624,7 @@ const categorizedUpload = multer({
   },
 });
 
-app.post("/api/gallery", categorizedUpload.array("photos", 10), (req, res) => {
+app.post("/api/gallery", authenticateRequest, requireAdmin, categorizedUpload.array("photos", 10), (req, res) => {
   const category = getGalleryCategory(req);
   if (!category || category === "INVALID" || category === UNCATEGORIZED) {
     return res.status(400).json({ message: "Please choose a valid gallery category." });
@@ -566,6 +633,40 @@ app.post("/api/gallery", categorizedUpload.array("photos", 10), (req, res) => {
   const files = Array.isArray(req.files) ? req.files : [];
   if (!files.length) {
     return res.status(400).json({ message: "Please upload at least one image." });
+  }
+
+  if (blobEnabled) {
+    Promise.resolve()
+      .then(async () => {
+        const created = [];
+        for (const file of files) {
+          const originalName = file.originalname || "upload";
+          const ext = path.extname(originalName) || ".jpg";
+          const key = `gallery/${category}/${Date.now()}-${crypto.randomUUID()}${ext.toLowerCase()}`;
+
+          const blob = await put(key, file.buffer, {
+            access: "public",
+            contentType: file.mimetype,
+          });
+
+          created.push({
+            id: blob.pathname,
+            name: originalName,
+            url: blob.url,
+            mimeType: file.mimetype,
+            size: file.size,
+            uploadedAt: new Date().toISOString(),
+            category,
+          });
+        }
+
+        return res.status(201).json({ photos: created });
+      })
+      .catch((error) => {
+        console.error("Blob upload failed:", error);
+        return res.status(500).json({ message: "Could not upload photos." });
+      });
+    return;
   }
 
   const created = files
@@ -606,6 +707,32 @@ app.post("/api/gallery/assign", authenticateRequest, requireAdmin, async (req, r
     return res.status(400).json({ message: "Invalid filename." });
   }
 
+  if (blobEnabled) {
+    try {
+      const ext = path.extname(filename) || ".jpg";
+      const toPathnameBase = `gallery/${targetCategory}/${path.basename(filename, ext)}${ext}`;
+      const fromUrlOrPathname = decoded;
+      const copied = await copy(fromUrlOrPathname, toPathnameBase, { access: "public", addRandomSuffix: true });
+      await del(fromUrlOrPathname);
+
+      const movedFilename = copied.pathname.split("/").pop() || copied.pathname;
+      return res.json({
+        photo: {
+          id: copied.pathname,
+          name: movedFilename,
+          url: copied.url,
+          mimeType: copied.contentType || guessMimeType(movedFilename),
+          size: copied.size,
+          uploadedAt: new Date().toISOString(),
+          category: targetCategory,
+        },
+      });
+    } catch (error) {
+      console.error("Blob assign failed:", error);
+      return res.status(500).json({ message: "Could not move file." });
+    }
+  }
+
   const sourcePath = path.join(uploadsDir, filename);
   const destinationDir = path.join(uploadsDir, targetCategory);
   const destinationPath = path.join(destinationDir, filename);
@@ -640,6 +767,27 @@ app.post("/api/gallery/assign", authenticateRequest, requireAdmin, async (req, r
 
 app.delete("/api/gallery/:id", authenticateRequest, requireAdmin, (req, res) => {
   const rawId = decodeURIComponent(String(req.params.id || ""));
+  if (blobEnabled) {
+    const id = rawId.trim();
+    if (!id) {
+      return res.status(400).json({ message: "Invalid photo id." });
+    }
+
+    const isUrl = /^https?:\/\//i.test(id);
+    const isPath = id.startsWith("gallery/");
+    if (!isUrl && !isPath) {
+      return res.status(400).json({ message: "Invalid photo id." });
+    }
+
+    del(id)
+      .then(() => res.json({ ok: true }))
+      .catch((error) => {
+        console.error("Blob delete failed:", error);
+        res.status(500).json({ message: "Could not delete photo." });
+      });
+    return;
+  }
+
   const [category, filename] = rawId.split("::");
 
   if (!category || !filename) {
