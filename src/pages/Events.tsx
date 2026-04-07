@@ -21,6 +21,9 @@ interface Event {
   featured?: boolean;
   joinLink?: string;
   registrationClosed?: boolean;
+  spotsLabel?: string;
+  participationLabel?: string;
+  linkLabel?: string;
   hideDate?: boolean;
   hideAttendees?: boolean;
   speaker?: string;
@@ -55,28 +58,35 @@ const events: Event[] = [
     moreInfo:
       "Hello everyone! We are from the XOps Club.\n\nThe XOps Club presents 'Chaos or Release,' held on 25 March 2026 in Seminar Hall 002.\n\nNo coding experience is needed. This is a fun decision-making game, not a technical one.\n\nTeam size: 3 members per team.\n\nYou will be given real-world scenario-based questions, and your team must decide within the allotted time.\n\nEarn the most points by making smart choices to avoid system failures!",
     date: "March 25, 2026 (Wednesday)",
-    time: "TBA",
+    time: "9.00AM",
     location: "Seminar Hall 002",
     type: "meetup",
     attendees: 0,
     maxAttendees: 120,
+    participationLabel: "20+ team participated",
+    linkLabel: "Website Link",
     image: "🎯",
     featured: true,
-    joinLink: "https://docs.google.com/forms/d/e/1FAIpQLScSSH4TaQ_ojWLoLimaA2CEIoYF9Eu-wonyWt77BEhB3YSkaw/viewform",
+    joinLink: "https://chaos-or-release-v2-production.up.railway.app",
+    registrationClosed: true,
   },
   {
-    id: 3,
-    title: "Cloud Computing Bootcamp",
-    description: "3-day intensive bootcamp covering AWS, Azure, and Google Cloud fundamentals.",
-    date: "March 20-22, 2026",
-    time: "10:00 AM - 4:00 PM",
-    location: "Virtual Event",
-    type: "bootcamp",
-    attendees: 80,
-    maxAttendees: 100,
-    image: "☁️",
-    hideDate: true,
-    hideAttendees: true,
+    id: 4,
+    title: "RPA AND ITS ENHANCEMENTS",
+    description:
+      "An exclusive, industry-focused webinar where software automation meets AI to optimize modern DevOps pipelines and workflows.",
+    moreInfo:
+      "Get ready to unlock the future of smart automation.\n\nThe Department of CSE (AI-Driven DevOps) and X-Ops Club present RPA AND ITS ENHANCEMENTS.\n\nThis webinar covers core RPA concepts plus AI advancements, real-world enterprise applications, and process automation logic with execution insights from a USA-based industry expert.\n\nFeatured Speaker: Ms. Praneetha K (Lead RPA Developer, Johnson & Johnson, USA)\n\nStatus: FREE and OPEN TO ALL\n\nEvent Details:\nDate: Tuesday, 7th April\nTime: 9:00 AM Onwards\nPlatform: Online Webinar\n\nLearn from the best. Upgrade your skills. Stay ahead of the curve.",
+    date: "Tuesday, 7th April",
+    time: "9:00 AM Onwards",
+    location: "Online Webinar",
+    type: "workshop",
+    attendees: 0,
+    maxAttendees: 500,
+    spotsLabel: "50+",
+    image: "🤖",
+    featured: true,
+    speaker: "Ms. Praneetha K (Lead RPA Developer, Johnson & Johnson, USA)",
   },
 ];
 
@@ -194,7 +204,7 @@ const Events = () => {
                       )}
                       {event.joinLink && (
                         <div className="mb-2 text-sm">
-                          <a href={event.joinLink} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Join Link</a>
+                          <a href={event.joinLink} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">{event.linkLabel ?? "Join Link"}</a>
                         </div>
                       )}
                       <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground mb-4">
@@ -212,7 +222,7 @@ const Events = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <Users className="h-4 w-4 text-primary" />
-                          {event.attendees}/{event.maxAttendees} spots
+                          {event.participationLabel ?? `${event.attendees}/${event.spotsLabel ?? event.maxAttendees} spots`}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -293,7 +303,7 @@ const Events = () => {
                     )}
                     {event.joinLink && (
                       <div className="mb-2 text-sm">
-                        <a href={event.joinLink} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Join Link</a>
+                        <a href={event.joinLink} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">{event.linkLabel ?? "Join Link"}</a>
                       </div>
                     )}
                     <div className="space-y-2 text-sm text-muted-foreground mb-4">

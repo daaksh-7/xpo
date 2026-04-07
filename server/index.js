@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken";
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
+import multer from "multer";
+import crypto from "node:crypto";
 
 dotenv.config();
 
@@ -19,6 +21,11 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
+const uploadsDir = path.join(dataDir, "gallery-uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const db = new Database(path.join(dataDir, "xops.db"));
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -29,10 +36,56 @@ db.exec(`
     role TEXT NOT NULL DEFAULT 'member',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+  CREATE TABLE IF NOT EXISTS gallery_photos (
+    id TEXT PRIMARY KEY,
+    filename TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    mime_type TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    uploaded_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+app.use("/uploads", express.static(uploadsDir));
+
+const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const maxUploadSizeBytes = 8 * 1024 * 1024;
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, callback) => {
+    callback(null, uploadsDir);
+  },
+  filename: (_req, file, callback) => {
+    const ext = path.extname(file.originalname) || ".jpg";
+    callback(null, `${Date.now()}-${crypto.randomUUID()}${ext.toLowerCase()}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: maxUploadSizeBytes,
+    files: 10,
+  },
+  fileFilter: (_req, file, callback) => {
+    if (allowedMimeTypes.has(file.mimetype)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Only JPG, PNG, WEBP, and GIF files are allowed."));
+  },
+});
+
+const toGalleryPhotoResponse = (req, row) => ({
+  id: row.id,
+  name: row.original_name,
+  url: `${req.protocol}://${req.get("host")}/uploads/${row.filename}`,
+  mimeType: row.mime_type,
+  size: row.size,
+  uploadedAt: row.uploaded_at,
+});
 
 function signToken(user) {
   return jwt.sign(
@@ -72,6 +125,66 @@ function adminRequired(req, res, next) {
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
+});
+
+app.get("/api/gallery", (req, res) => {
+  const photos = db
+    .prepare(
+      "SELECT id, filename, original_name, mime_type, size, uploaded_at FROM gallery_photos ORDER BY datetime(uploaded_at) DESC"
+    )
+    .all();
+
+  return res.json({ photos: photos.map((row) => toGalleryPhotoResponse(req, row)) });
+});
+
+app.post("/api/gallery", upload.array("photos", 10), (req, res) => {
+  const files = Array.isArray(req.files) ? req.files : [];
+
+  if (!files.length) {
+    return res.status(400).json({ message: "Please upload at least one image." });
+  }
+
+  const insert = db.prepare(
+    "INSERT INTO gallery_photos (id, filename, original_name, mime_type, size) VALUES (?, ?, ?, ?, ?)"
+  );
+
+  const created = files.map((file) => {
+    const id = crypto.randomUUID();
+    insert.run(id, file.filename, file.originalname, file.mimetype, file.size);
+
+    const row = db
+      .prepare(
+        "SELECT id, filename, original_name, mime_type, size, uploaded_at FROM gallery_photos WHERE id = ?"
+      )
+      .get(id);
+
+    return toGalleryPhotoResponse(req, row);
+  });
+
+  return res.status(201).json({ photos: created });
+});
+
+app.delete("/api/gallery/:id", (req, res) => {
+  const row = db
+    .prepare("SELECT id, filename FROM gallery_photos WHERE id = ?")
+    .get(req.params.id);
+
+  if (!row) {
+    return res.status(404).json({ message: "Photo not found." });
+  }
+
+  db.prepare("DELETE FROM gallery_photos WHERE id = ?").run(req.params.id);
+
+  const filePath = path.join(uploadsDir, row.filename);
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch {
+    return res.status(500).json({ message: "Photo deleted from DB but file cleanup failed." });
+  }
+
+  return res.json({ ok: true });
 });
 
 app.post("/api/auth/signup", async (req, res) => {
@@ -163,6 +276,18 @@ app.get("/api/admin/users", authRequired, adminRequired, (_req, res) => {
     .all();
 
   return res.json({ users });
+});
+
+app.use((error, _req, res, _next) => {
+  if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ message: `Each file must be ${maxUploadSizeBytes / (1024 * 1024)}MB or less.` });
+  }
+
+  if (error instanceof Error) {
+    return res.status(400).json({ message: error.message });
+  }
+
+  return res.status(500).json({ message: "Unexpected server error." });
 });
 
 app.listen(PORT, () => {

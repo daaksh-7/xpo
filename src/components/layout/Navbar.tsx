@@ -8,6 +8,7 @@ import { clearAuthSession, getAuthSession } from "@/lib/auth";
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Events", path: "/events" },
+  { name: "Gallery", path: "/gallery" },
   { name: "About", path: "/about" },
 ];
 

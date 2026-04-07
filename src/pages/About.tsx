@@ -31,56 +31,58 @@ const teamMembers = [
     name: "Shreyas S",
     role: "Club Lead",
     bio: "Leading the shift to autonomous DevOps.",
-    avatar: "👨",
+    profileImage: "/Shreyas%20S.jpg",
+    imageClassName: "object-contain bg-card p-1",
     socials: { linkedin: "https://www.linkedin.com/in/shreyas-s-357056327?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
   {
     name: "Lakshitha A",
     role: "Club Co-Lead",
     bio: "Accelerating team growth and AI integration.",
-    avatar: "👩",
+    profileImage: "/Lakshitha%20A.jpg",
     socials: { linkedin: "https://www.linkedin.com/in/lakshitha-a-b16090330?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
   {
     name: "Saksham Singh",
     role: "Technical Lead",
     bio: "Debugging the future with AI-enhanced workflows.",
-    avatar: "🧑‍💻",
+    profileImage: "/Saksham%20Singh.jpg",
     socials: { linkedin: "https://www.linkedin.com/in/saksham-singh-94658b322/" },
   },
   {
     name: "Thulasi Sri Nidhi",
     role: "Technical Co-Lead",
     bio: "Building the pipelines that power the club.",
-    avatar: "👩‍💻",
+    profileImage: "/Thulasi%20Sri%20Nidhi.jpg",
+    imageClassName: "object-contain bg-card p-1",
     socials: { linkedin: "https://www.linkedin.com/in/thulasi-sri-nidhi-ba17a3382?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
   {
     name: "Thavanidhi V P",
     role: "Event & Outreach Lead",
     bio: "Bridging the gap between AI tech and the student community.",
-    avatar: "👩",
+    profileImage: "/Thavanidhi%20V%20P.jpg",
     socials: { linkedin: "https://www.linkedin.com/in/thavanidhi-v-p-1a797136a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app" },
   },
   {
     name: "Sujay V",
     role: "Event & Outreach Co-Lead",
     bio: "Expanding the ecosystem for the next gen of DevOps.",
-    avatar: "🧑",
+    profileImage: "/Sujay%20V.jpg",
     socials: { linkedin: "https://www.linkedin.com/in/sujayv26?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
   {
     name: "Aniruddh V N",
     role: "Treasurer",
     bio: "Managing resources for a high-performance tech future.",
-    avatar: "🧑",
+    profileImage: "/Aniruddh%20V%20N.jpg",
     socials: { linkedin: "https://www.linkedin.com/in/aniruddh-v-n-5b7124340?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
   {
     name: "Divyashree M",
     role: "Co-Treasurer",
     bio: "Financial operations for sustainable tech growth.",
-    avatar: "👩",
+    profileImage: "/Divyashree%20M.jpg",
     socials: { linkedin: "https://www.linkedin.com/in/divyashree-m-11a334326?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" },
   },
 ];
@@ -269,7 +271,12 @@ const About = () => {
                 className="gradient-border p-6 text-center card-hover animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="text-6xl mb-4">{member.avatar}</div>
+                <img
+                  src={member.profileImage}
+                  alt={`${member.name} profile picture`}
+                  className={`h-24 w-24 rounded-full object-cover mx-auto mb-4 border border-border ${member.imageClassName ?? "object-top"}`}
+                  loading="lazy"
+                />
                 <h3 className="text-lg font-semibold">{member.name}</h3>
                 <p className="text-primary text-sm font-medium mb-2">{member.role}</p>
                 <p className="text-muted-foreground text-sm mb-4">{member.bio}</p>
