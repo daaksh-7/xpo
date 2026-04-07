@@ -316,9 +316,6 @@ const Uploads = () => {
                       </button>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-3 truncate" title={photo.name}>
-                    {photo.name}
-                  </p>
                 </article>
               ))}
             </div>

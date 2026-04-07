@@ -5,11 +5,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { clearAuthSession, getAuthSession } from "@/lib/auth";
 
-const navLinks = [
+const baseNavLinks = [
   { name: "Home", path: "/" },
   { name: "Events", path: "/events" },
   { name: "Gallery", path: "/gallery" },
-  { name: "Uploads", path: "/uploads" },
   { name: "About", path: "/about" },
 ];
 
@@ -25,6 +24,7 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
   const isLoggedIn = Boolean(role);
+  const navLinks = role === "admin" ? [...baseNavLinks.slice(0, 3), { name: "Uploads", path: "/uploads" }, baseNavLinks[3]] : baseNavLinks;
 
   const handleLogout = () => {
     clearAuthSession();
