@@ -83,6 +83,9 @@ const Admin = () => {
                   Refresh
                 </Button>
                 <Button variant="hero-outline" asChild>
+                  <Link to="/admin/uploads">Manage Uploads</Link>
+                </Button>
+                <Button variant="hero-outline" asChild>
                   <Link to="/events">View Events</Link>
                 </Button>
                 <Button variant="destructive" onClick={handleLogout}>
